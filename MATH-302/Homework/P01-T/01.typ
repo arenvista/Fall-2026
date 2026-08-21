@@ -1,25 +1,12 @@
 #import "template.typ": *
 #import "@preview/tablem:0.3.0": tablem, three-line-table
 
-#show: notes.with(
+#show: homework.with(
   title: "MATH 302: Homework 1",
 	course: "MATH 302",
 	author: "Aren Vista",
 	date: "September 8, 2025",
 )
-
-// Homework-style: no automatic equation numbers. Delete to restore template default.
-#set math.equation(numbering: none)
-#set enum(spacing: 1.4em)
-
-#show math.equation: it => {
-	show sym.exists: e => e + h(0.17em)
-	show sym.forall: f => f + h(0.17em)
-	it
-}
-
-// Inner product shorthand
-#let ip(a, b) = $lr(⟨ #a, #b ⟩)$
 
 = Question 1 
  #question[Show that every normed vector space $(V, norm(dot))$ is automatically a metric space $(V, d)$ with the metric $d$ given by $d(x, y) = norm(x - y)$.]
@@ -48,7 +35,11 @@ By the definition of $d$, we have:
 $
     d(x,y) = norm(x - y)
 $ 
-Therefore if $x < y$ or $y < x$ then $0 < norm(x-y)$. By trichotomy, we have that $x=y$ if and only if $norm(x-y) = 0$. Thus, the "Identity of Indiscernibles" property holds. $qed$
+By the definition of a norm, $norm(v) = 0$ if and only if $v = 0$. Applying this to $v = x - y$:
+$
+d(x,y) = 0 <=> norm(x - y) = 0 <=> x - y = 0 <=> x = y,
+$
+where the final step follows by adding $y$ to both sides. Thus, the "Identity of Indiscernibles" property holds. $qed$
 
 == Symmetry
 
@@ -88,8 +79,60 @@ As the distance function $d$ is defined as the norm of the difference between tw
 
 As we have shown that $d$ satisfies all four properties of a metric space, we conclude that every normed vector space $(V, norm(dot))$ is automatically a metric space $(V, d)$ with the metric $d$ given by $d(x, y) = norm(x - y)$.
 
-
 = Question 2
 #question[On $RR^n$ define, for any $x = (x_1, dots, x_n)$, $ norm(x)_1 = sum_(j=1)^n abs(x_j) quad "and" quad norm(x)_infinity = max{abs(x_1), dots, abs(x_n)}. $ Show that both $norm(x)_1$ and $norm(x)_infinity$ are norms on $RR^n$.]
 
+#definition(title: "Definition of a Norm")[
+	An element is a norm if the following is met:
+
+	#align(center)[#tablem(align: left)[
+		| *Property*                 | *Description*                      |
+		| -------------------------- | ------------------------           |
+		| I. Positive Definite       | $norm(x) = 0 <==> x=0$             |
+		| II. Absolute Homogenity    | $norm(a x) = norm(a) norm(x)$      |
+		| III. Triangle Inequality   | $norm(x + y) <= norm(x) + norm(y)$ |
+	]]
+]
+
+WWTS $norm(x)_1$ and $norm(x)_oo$ maintain these properties on the metric space $RR^n$
+
+== Positive Definite
+
+Let $p:= (norm(x)= 0)$ and $q:=(x=0)$  
+
+=== Forward Proof
+WWTS $p ==> q equiv ~p or q equiv (norm(x)!=0) ==> (x=0)$ 
+
+==== Case $norm(x)_1$
+Consider $norm(x)_1 != 0$. Thus it follows by subsitution:
+$ norm(x)_1 = sum_(j=1)^n abs(x_j) = 0 $
+
+As $forall x, x in RR$ it follows then $forall |x|, 0 <= |x|$  by the properties of absolute values.
+
+WLOG Let $x_a, x_b in {x_1,..,x_n}$. Observe the following:
+$
+#grid(
+  columns: 4,
+  align: (center, right, center, left),
+  column-gutter: 0.3em,
+  row-gutter: 0.45em,
+  [], $0$, $<$, $abs(x_a)$,
+  $+$, $0$, $<$, $abs(x_b)$,
+  grid.hline(stroke: 0.5pt),
+  [], $0$, $<$, $abs(x_a) + abs(x_b)$,
+)
+$
+
+==== Case $norm(x)_oo$
+Consider $norm(x)_oo != 0$. Thus it follows by subsitution:
+$ norm(x)_oo = max{|x_1|,...,|x_n|} = 0 $
+$ norm(x)_oo equiv |x_a| : forall x in {|x_1|,...,|x_n|}, x <= |x_a| $
+
+By trichotomy $forall x in {x_1, ..., x_n}$ we can say $x$ must be either positive, negative, or exactly zero. Given $|x_a| = 0$
+$
+| x_a | = 0 ==> x_a = 0
+$
+
+=== Back Proof
+WWTS $q ==> p equiv ~q or p equiv (x != 0) ==> (norm(x) == 0)$
 

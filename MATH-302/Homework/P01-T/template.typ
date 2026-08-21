@@ -54,7 +54,6 @@
           #if course != none [ #course ]
           #if course != none and date != none [ #h(0.5em) · #h(0.5em) ]
           #if date != none [ #date ]
-          #if date != none [ #date ]
         ]
       }
       // if author != none {
@@ -124,5 +123,21 @@
 #let QQ = math.bb("Q")
 #let CC = math.bb("C")
 #let eps = math.epsilon
+#let ip(a, b) = $lr(⟨ #a, #b ⟩)$
 #let norm(x) = $lr(bar.v.double #x bar.v.double)$
 #let abs(x) = $lr(bar.v #x bar.v)$
+
+// ---- Homework variant ----
+// Same as `notes`, plus the settings every problem set wants:
+// no equation numbers, roomier enums, and breathing space after ∃/∀.
+#let homework(..args, body) = {
+  show: notes.with(..args)
+  set math.equation(numbering: none)
+  set enum(spacing: 1.4em)
+  show math.equation: it => {
+    show sym.exists: e => e + h(0.17em)
+    show sym.forall: f => f + h(0.17em)
+    it
+  }
+  body
+}
