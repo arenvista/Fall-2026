@@ -496,3 +496,90 @@ A few things worth reading off the statement:
 > The pile labeled $a^2b^2$ contains every way of grabbing the $a$ from two brackets and the $b$ from the other two. Nobody cares _which_ two brackets gave the $a$ — the answer is $a^2b^2$ either way — so what you are counting is the number of $2$-element subsets of $4$ brackets. That is $\binom{4}{2} = 6$, and $6$ is the coefficient.
 >
 > So the coefficient is not an algebra fact that happens to look like a combination. **It is a combination**: the number of ways of choosing where the $a$'s came from.
+
+# Combinatorial Proofs
+
+A **combinatorial proof** establishes an equation by refusing to do algebra with it. Rather than transforming one side into the other, you find a collection of objects that _both_ sides count, and count that collection twice.
+
+- **Why it is valid** (4.2.1) — two functions that answer the same counting question cannot disagree, so $f(n) = g(n)$ for every $n$. The equality is forced by the objects; nothing is manipulated into anything.
+
+- **What comes out** (4.2.2) — the equation itself is a **combinatorial identity**, and the double count is its proof. The identity is the residue of having asked one question twice.
+
+- **Where the work is** — choosing what to count. Usually one side of the identity names the objects outright, and the other side hints at how to organize the second count: a sum wants cases (Sum Rule, 2.2.4), a product wants steps (Product Rule, 2.1.3).
+
+- **The only way to go wrong** — a count that misses objects or counts one twice. Both methods must hit every object exactly once, which is why the disjoint-and-exhaustive check on cases keeps reappearing below.
+
+Algebraic proofs of these identities usually exist and are usually shorter. They also explain nothing: the factorials cancel and you learn that the two sides are equal without ever learning _why_. A combinatorial proof trades brevity for the reason.
+
+---
+
+> [!thm |b t] 4.2.1 Combinatorial Proofs
+> If $f(n)$ and $g(n)$ are functions that count the number of solutions to some problem involving $n$ objects then $\forall~ n, f(n) = g(n)$
+
+> [!def | b t] 4.2.2 Combinatorial Identity
+> Suppose that we count the solutions to a problem about $n$ objects in one way and obtain the answer $f(n)$ for some function $f$; and then we count the solutions to the **combinatorial proof** of the identity $f(n)=g(n)$
+>
+> The equation $f(n)=g(n)$ is referred to as a **combinatorial identity**
+
+## Combinatorial Proof Outline
+
+> [!key |t] Combinatorial Proof Outline
+>
+> 1. _Identify the problem you are counting._
+> 2. _Counting method one_
+> 3. _Counting method two_
+> 4. _Conclusion_
+
+The two counts never speak to each other. Neither one is derived from the other, and no algebra passes between them — the only thing linking them is that they are answers to the _same_ question, which forces them to agree.
+
+> [!? |b t] Example Combinatorial Proof:
+> $$\text{Let }\sum_{r=0}^{n} \binom{n}{r} = 2^n$$
+>
+> **1. Identify the problem you are counting.**
+> Fix a set $S$ with $n$ elements. Count the subsets of $S$ — all of them, from $\varnothing$ up to $S$ itself.
+>
+> **2. Counting method one.**
+> Build a subset by walking down the list of elements and deciding, for each one, _in_ or _out_. That is $n$ steps with $2$ options each, and the options never depend on the earlier decisions, so the Product Rule (2.1.5) applies:
+> $$\underbrace{2 \cdot 2 \cdots 2}_{n} = 2^n.$$
+> Every subset arises from exactly one sequence of decisions, so this counts each subset once.
+>
+> **3. Counting method two.**
+> Sort the subsets by size instead. A subset of size $r$ is a choice of $r$ elements from $n$ with order irrelevant — an $r$-combination — so there are $\binom{n}{r}$ of them by Theorem 3.2.3. A subset has exactly one size, and that size is one of $0, 1, \dots, n$, so the cases are disjoint and exhaustive and the Sum Rule (2.2.4) applies:
+> $$\binom{n}{0} + \binom{n}{1} + \cdots + \binom{n}{n} = \sum_{r=0}^{n} \binom{n}{r}.$$
+>
+> **4. Conclusion.**
+> Both expressions count the subsets of an $n$-element set, so they are equal:
+> $$\sum_{r=0}^{n} \binom{n}{r} = 2^n. \qquad \blacksquare$$
+>
+> The $n = 4$ case is the picture from the Binomial Theorem section: $1 + 4 + 6 + 4 + 1 = 16 = 2^4$, the columns counted by height against the whole page counted at once.
+
+> [!hum|b t] Intuition
+> **What did the proof actually do?**
+>
+> It asked one question — "how many subsets?" — and let two different people answer it.
+>
+> The first walks the elements one at a time flipping a coin for each: _keep, drop, keep, keep…_. They never think about how big the subset ends up. They report $2^n$.
+>
+> The second refuses to look at subsets one at a time and sorts them into bins by size first: the empty one, the singletons, the pairs, and so on. They count each bin with $\binom{n}{r}$ and add. They report $\sum_r \binom{n}{r}$.
+>
+> Neither one is doing algebra. They are counting the same pile of subsets, so their two numbers were never allowed to differ — and _that_ is the whole proof. The identity is a byproduct of the disagreement being impossible.
+
+> [!?|b t] Pascal's Identity
+> Give a combinatorial proof that for $1 \le r \le n-1$,
+> $$\binom{n}{r} = \binom{n-1}{r-1} + \binom{n-1}{r}.$$
+>
+> > [!check|nb t]- View Solution
+> > **The problem.** Count the $r$-element subsets of $\{1, 2, \dots, n\}$.
+> >
+> > **Method one.** Directly, there are $\binom{n}{r}$ of them (Theorem 3.2.3).
+> >
+> > **Method two.** Single out the element $n$ and split on whether a subset contains it — every $r$-subset falls into exactly one case, so the Sum Rule applies.
+> >
+> > - _Contains $n$:_ the remaining $r-1$ elements come from $\{1, \dots, n-1\}$, giving $\binom{n-1}{r-1}$ subsets.
+> > - _Misses $n$:_ all $r$ elements come from $\{1, \dots, n-1\}$, giving $\binom{n-1}{r}$ subsets.
+> >
+> > Adding, this method reports $\binom{n-1}{r-1} + \binom{n-1}{r}$.
+> >
+> > **Conclusion.** Both count the $r$-subsets of an $n$-set, so they agree, which is the identity. $\blacksquare$
+> >
+> > This is the rule behind Pascal's triangle: each entry is the sum of the two above it, because each $r$-subset either uses the last element or does not.
