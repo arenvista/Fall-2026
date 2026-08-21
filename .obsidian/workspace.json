@@ -207,17 +207,20 @@
   },
   "active": "aa5abad0b5a46abe",
   "lastOpenFiles": [
+    "MATH-385/Notes/Hello.md",
+    "MATH-385/Notes",
+    "MATH-475/Notes/Hello.md",
+    "MATH-475/Notes",
+    "MATH-479/Notes/Hello.md",
+    "MATH-479/Notes",
+    "MATH-380/Notes/Hello.md",
+    "MATH-380/Notes",
     "MATH-302/Homework/P01/template.tex",
     "MATH-302/Homework/P01/pdflatex1549215.fls",
     "MATH-302/Homework/P01/01.tex",
     "MATH-302/Homework/P01/01.pdf",
     "MATH-302/Homework/P01/01.log",
     "MATH-302/Homework/P01/01.fls",
-    "MATH-302/Homework/P01/01.fdb_latexmk",
-    "MATH-302/Homework/P01/01.aux",
-    "MATH-302/Homework/P01",
-    "MATH-302/Homework/P01-T/template.typ",
-    "MATH-302/Homework/P01-T/01.typ",
     "sample-figure.svg",
     "MATH-302/Notes/01-Notes.md",
     "sample.md",
@@ -240,9 +243,6 @@
     "LecFormated/L03.md",
     "LecFormated/L02.md",
     "LecFormated/L01.md",
-    "LecNew/L014.md",
-    "LecFormated/E02.md",
-    "LecNew/L016.md",
-    "LecNew/L016x.md"
+    "LecNew/L014.md"
   ]
 }

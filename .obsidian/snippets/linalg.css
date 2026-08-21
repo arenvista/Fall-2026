@@ -471,6 +471,21 @@ body {
 .markdown-source-view.mod-cm6.numbered .HyperMD-header-2 {
   counter-increment: sec;
 }
+/* Same exception the border rule makes above, for the same reason: an `##`
+   used as structure INSIDE a callout is not a section of the document. Left
+   alone it would both take a number of its own and advance the counter, so
+   the next real section would skip a value. `counter-increment` has to be
+   cancelled as well as the marker — hiding `::before` alone would still leak
+   the skipped number. */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered.numbered .callout-content h2,
+.print .markdown-rendered.numbered .callout-content h2 {
+  counter-increment: none;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered.numbered .callout-content h2::before,
+.print .markdown-rendered.numbered .callout-content h2::before {
+  content: none;
+}
+
 .workspace-leaf-content[data-type="markdown"] .markdown-rendered.numbered h2::before,
 .print .markdown-rendered.numbered h2::before,
 .markdown-source-view.mod-cm6.numbered .HyperMD-header-2::before {
