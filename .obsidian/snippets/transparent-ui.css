@@ -1,0 +1,105 @@
+/* =========================================================================
+   transparent-ui — clears the background off Obsidian's window chrome
+   -------------------------------------------------------------------------
+   Targets the frame around the note: titlebar, left ribbon, tab bar / view
+   header ("toolbar"), sidebars and status bar, plus the divider lines
+   between panes. Everything falls through to --background-primary, so the
+   whole window reads as one surface with no visible seams.
+
+   WHAT THIS IS NOT: transparent chrome is not see-through to the desktop on
+   its own — panes are separate boxes painted over the workspace container,
+   so a cleared tab header reveals the window background, not your wallpaper
+   and not note text scrolling underneath. Real window translucency is
+   Settings > Appearance > "Translucent window", which sets body.is-translucent
+   and is only offered on some platforms. AnuPpuccin already ships its own
+   is-translucent branch (theme.css ~3916-3960) that does roughly what this
+   file does; the rules here are deliberately unconditional so the flat look
+   holds whether or not that toggle exists, and they agree with the theme's
+   branch rather than fighting it.
+
+   SCOPING NOTES (audited against AnuPpuccin theme.css):
+     - Style Settings is not installed, so every `.anp-*` rule in the theme
+       is inert — including the card/border layouts that would otherwise
+       redefine --tab-container-background and friends. The chrome variables
+       therefore resolve to Obsidian core's defaults, which is why setting
+       them on `body` is enough and needs no !important.
+     - --background-secondary is deliberately LEFT ALONE. It is not just a
+       sidebar color: code blocks, inputs, hover states and popups read it
+       too, so zeroing it would gut half the UI. The element-level rules
+       below are the theme's own translucency selector list, which is the
+       tested way to clear the sidebars without touching that variable.
+     - Popups stay opaque on purpose. `.menu`, `.modal`, `.prompt` and
+       `.suggestion-container` float over content — transparent backgrounds
+       there make text unreadable, so nothing here touches them.
+     - Stacked tabs keep --background-primary (same exception the theme
+       makes): their headers overlap each other and need something to hide
+       the tab behind.
+   ========================================================================= */
+
+body {
+  /* Chrome surfaces */
+  --titlebar-background: transparent;
+  --titlebar-background-focused: transparent;
+  --ribbon-background: transparent;
+  --ribbon-background-collapsed: transparent;
+  --tab-container-background: transparent;
+  --status-bar-background: transparent;
+  /* --tab-background-active is deliberately NOT cleared. It is the only
+     thing separating the focused tab from its neighbours once the container
+     behind them is gone; AnuPpuccin's own translucency branch leaves it
+     painted too. Clear it only if you never keep more than one tab open. */
+
+  /* Seams: pane dividers, tab outlines, status bar rule */
+  --divider-color: transparent;
+  --divider-color-hover: var(--background-modifier-border);
+  --tab-outline-color: transparent;
+  --status-bar-border-color: transparent;
+  --status-bar-border-width: 0px;
+}
+
+/* Containers Obsidian paints directly rather than through a variable. */
+.titlebar,
+.status-bar,
+.workspace,
+.workspace-split.mod-root,
+.workspace-split.mod-left-split,
+.workspace-split.mod-right-split,
+.horizontal-main-container,
+.workspace-ribbon.mod-left,
+.workspace-ribbon.mod-left::before,
+.workspace-tabs,
+.workspace-tabs .workspace-leaf,
+.mod-left-split .workspace-tab-header-container,
+.mod-right-split .workspace-tab-header-container,
+.mod-top .workspace-tab-header-container,
+.view-header {
+  background-color: transparent;
+}
+
+/* Sidebar panes: the leaf above is cleared, but the view body under it
+   carries --background-secondary of its own. */
+.mod-left-split .view-content,
+.mod-right-split .view-content {
+  background-color: transparent;
+}
+
+/* Hairlines the theme/core draw as borders instead of dividers. */
+.view-header,
+.workspace-ribbon.mod-left,
+.workspace-ribbon.mod-right,
+.mod-left-split .workspace-tab-header-container,
+.mod-right-split .workspace-tab-header-container {
+  border-color: transparent;
+}
+
+/* The fade-out gradient masking a long tab title assumes an opaque header. */
+.view-header-title-container:not(.mod-at-end)::after {
+  background-image: none;
+}
+
+/* Exception: stacked tabs overlap, so they still need a solid backing. */
+.workspace-tabs.mod-stacked .workspace-tab-header,
+.workspace-tabs.mod-stacked .view-header {
+  background-color: var(--background-primary);
+}
+

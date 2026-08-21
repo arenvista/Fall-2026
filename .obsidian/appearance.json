@@ -1,0 +1,12 @@
+{
+  "enabledCssSnippets": [
+    "callouts",
+    "img",
+    "linalg",
+    "transparent-ui",
+    "math"
+  ],
+  "cssTheme": "AnuPpuccin",
+  "accentColor": "",
+  "theme": "obsidian"
+}

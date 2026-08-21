@@ -1,0 +1,189 @@
+/* =========================================================================
+   callouts — theorem environments
+   -------------------------------------------------------------------------
+   Obsidian reads `--callout-color` as a bare "R, G, B" triple, because core
+   composes it as `rgba(var(--callout-color), 0.1)` for the tint and
+   `rgb(var(--callout-color))` for the title and icon. That is why these are
+   comma-separated numbers and not hex.
+
+   DARK MODE: the palette is Apple's system colors, and the original set here
+   was the LIGHT-mode half of it. `appearance.json` selects the dark theme, so
+   every one of those was being painted on a ground it was never toned for,
+   at full strength, in the title row.
+
+   How close to the edge depends on the hue and on what is under it, since
+   the ground is linalg.css's #0d131b when that snippet is on and
+   AnuPpuccin's #1e1e2e when it is not. Measured, light value → dark value:
+
+                        #0d131b        #1e1e2e
+       blue           4.64 → 5.11    4.08 → 4.50
+       purple         4.52 → 5.29    3.97 → 4.65
+       cyan           7.25 → 10.84   6.37 → 9.53
+       green          8.40 → 9.22    7.39 → 8.11
+       gray           5.72 → 6.49    5.03 → 5.71
+       red            5.26 → 5.47    4.62 → 4.81
+
+   So most of the set was never in trouble — blue and purple were, and only
+   on the lighter of the two grounds. Core also paints
+   `rgba(var(--callout-color), 0.1)` behind the callout, so the true backdrop
+   is the ground tinted 10% with the callout color, nudging every figure down
+   slightly from the table. The dark column clears 4.5:1 throughout.
+
+   Each entry pairs the light value with Apple's own dark-mode counterpart,
+   which keeps the two sets coherent instead of hand-mixing lighter blues one
+   at a time. ONE EXCEPTION: indigo. Apple's dark systemIndigo #5E5CE6 only
+   reaches 3.68:1 / 3.24:1 — the hue is simply too dark to survive on a dark
+   ground — so the dark entry is lightened toward lavender (#8E8CF0, 6.36:1 /
+   5.59:1) instead.
+
+   Structure matches linalg.css: `.theme-light` / `.theme-dark`, not
+   prefers-color-scheme, because the theme is chosen in Obsidian
+   independently of the OS.
+
+   Colors live in `--cal-*` variables so a callout type's identity is declared
+   once, in one place, and the per-type blocks stay one-liners.
+   ========================================================================= */
+
+.theme-light {
+  --cal-blue:   0, 122, 255;
+  --cal-cyan:   48, 176, 199;
+  --cal-purple: 175, 82, 222;
+  --cal-indigo: 88, 86, 214;
+  --cal-green:  52, 199, 89;
+  --cal-gray:   142, 142, 147;
+  --cal-orange: 255, 149, 0;
+  --cal-yellow: 255, 204, 0;
+  --cal-red:    255, 59, 48;
+  --cal-pink:   255, 45, 85;
+}
+
+.theme-dark {
+  --cal-blue:   10, 132, 255;
+  --cal-cyan:   100, 210, 255;
+  --cal-purple: 191, 90, 242;
+  --cal-indigo: 142, 140, 240; /* NOT Apple's dark indigo — see header */
+  --cal-green:  48, 209, 88;
+  --cal-gray:   152, 152, 157;
+  --cal-orange: 255, 159, 10;
+  --cal-yellow: 255, 214, 10;
+  --cal-red:    255, 69, 58;
+  --cal-pink:   255, 55, 95;
+}
+
+/* ---- the statement environments ---------------------------------------- */
+
+/* THEOREM */
+.callout[data-callout="thm"] {
+    --callout-color: var(--cal-blue);
+    --callout-icon: "lucide-scroll-text";
+}
+
+/* PROPOSITION — added for symmetry with thm/lem/cor; amsthm's fourth
+   statement environment, and the one a math vault hits constantly. */
+.callout[data-callout="prop"] {
+    --callout-color: var(--cal-indigo);
+    --callout-icon: "lucide-flag";
+}
+
+/* LEMMA */
+.callout[data-callout="lem"] {
+    --callout-color: var(--cal-cyan);
+    --callout-icon: "lucide-puzzle";
+}
+
+/* COROLLARY */
+.callout[data-callout="cor"] {
+    --callout-color: var(--cal-purple);
+    --callout-icon: "lucide-arrow-down-right";
+}
+
+/* DEFINITION */
+.callout[data-callout="def"] {
+    --callout-color: var(--cal-green);
+    --callout-icon: "lucide-book-open";
+}
+
+/* ---- commentary -------------------------------------------------------- */
+
+/* INTUITION — the informal reading of a result */
+.callout[data-callout="hum"] {
+    --callout-color: var(--cal-cyan);
+    --callout-icon: "lucide-brain";
+}
+
+/* CASE — "Case 1", scenario splits inside a proof */
+.callout[data-callout="case"] {
+    --callout-color: var(--cal-orange);
+    --callout-icon: "lucide-briefcase";
+}
+
+/* QUESTION — open problems, things to ask about */
+.callout[data-callout="?"] {
+    --callout-color: var(--cal-yellow);
+    --callout-icon: "lucide-help-circle";
+}
+
+/* IMPORTANT — risks, easy mistakes, "do not do this" */
+.callout[data-callout="imp"] {
+    --callout-color: var(--cal-red);
+    --callout-icon: "lucide-alert-circle";
+}
+
+/* KEY — the takeaway worth memorizing.
+   TASTE CHANGE: this was the same red as `imp`. Two types that differ only
+   by icon read as one type at a glance, and these two mean opposite things —
+   `imp` is a warning, `key` is a result to keep. Pink separates them while
+   staying in the warm half of the palette. Revert by swapping in
+   `var(--cal-red)`. */
+.callout[data-callout="key"] {
+    --callout-color: var(--cal-pink);
+    --callout-icon: "lucide-key-round";
+}
+
+/* ---- proof ------------------------------------------------------------- */
+/* Deliberately the quietest block on the page: a proof is long and is read
+   linearly, so it should not compete with the statement it follows. */
+
+.callout[data-callout="pf"] {
+    --callout-color: var(--cal-gray);
+    --callout-icon: "lucide-pen-tool";
+    font-style: italic; /* amsthm's `proof` style sets the body in italic */
+}
+
+/* QED marker.
+   The previous version hung `content: "∎"` off `.callout::after` with
+   `margin-top: -1em` to drag it back up over the last paragraph's bottom
+   margin. `.callout` is `display: block` in core, so that box lands on its
+   own line below the content and the negative margin is guesswork against
+   whatever the last block's spacing happens to be — it lands wrong after a
+   list, a `$$` block, or a nested callout.
+
+   Attaching the marker to the last paragraph instead puts it where amsthm
+   puts it: appended to the end of the final line of text, after a
+   non-breaking space so it can never wrap onto a line of its own. The
+   `:has()` rule is the fallback for a proof that ends in something other
+   than a paragraph — a display equation, a list — where there is no line to
+   sit on and a block of its own is correct.
+
+   Both rules use the child combinator on purpose. As descendant selectors
+   they would also match the `.callout-content` of any callout NESTED inside
+   the proof — a `[!case]` block mid-argument would pick up its own stray ∎.
+
+   Reading view only. Live Preview renders callouts through a CodeMirror
+   widget whose internal structure differs, so the marker may not appear
+   while editing; that is not worth engineering around. */
+
+.callout[data-callout="pf"] > .callout-content > p:last-child::after {
+    content: "\00A0∎";
+    color: rgb(var(--callout-color));
+    font-style: normal;
+}
+
+.callout[data-callout="pf"] > .callout-content:not(:has(> p:last-child))::after {
+    content: "∎";
+    display: block;
+    text-align: right;
+    margin-top: 0.4em;
+    color: rgb(var(--callout-color));
+    font-style: normal;
+}

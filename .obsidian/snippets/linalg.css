@@ -1,0 +1,484 @@
+/* =========================================================================
+   linalg — Obsidian port of the "linalg" markdown design language
+   -------------------------------------------------------------------------
+   The source stylesheet targeted `.markdown-body` (github-markdown-css /
+   VS Code preview). Obsidian has no such class and renders notes through
+   several different DOMs, so scoping here is deliberate:
+
+     .workspace-leaf-content[data-type="markdown"] .markdown-rendered
+     .print .markdown-rendered ..... rendered content: reading view, PDF
+                                     export, live-preview widgets (tables,
+                                     callouts) and embeds. Deliberately NOT
+                                     bare `.markdown-rendered`, which also
+                                     matches backlinks, search previews and
+                                     hover popovers — those never match the
+                                     variable block below, so an `##` there
+                                     would take 3.6rem of lead in a sidebar.
+     .markdown-source-view.mod-cm6 . live-preview raw lines (CodeMirror 6)
+
+   Dark mode uses Obsidian's `.theme-dark` class, NOT prefers-color-scheme —
+   appearance.json selects the dark theme independently of the OS.
+
+   COEXISTENCE NOTES (audited against AnuPpuccin 9080-line theme.css and the
+   callouts/img snippets — see the clash notes inline):
+     - Style Settings is not installed, so every `.anp-*` toggle rule in the
+       theme is inert. Only the theme's unconditional rules are in play.
+     - Body font goes through `--font-text-override`, not `--font-text`.
+       AnuPpuccin redefines `--font-text` on `.markdown-source-view
+       .is-live-preview` and `.markdown-preview-view`, which sit *closer* to
+       the text than any pane-level scope — proximity beats specificity for
+       custom properties, so setting `--font-text` here would silently lose
+       in Live Preview. `--font-text-override` is the hook both Obsidian core
+       and AnuPpuccin read, so it wins in all three views at once.
+     - Bullets go through `--list-bullet-*` and `.list-bullet::after`.
+       Obsidian emits a real `<span class="list-bullet">` in reading view too
+       (`ul.has-list-bullet`), so a hand-rolled `li::before` diamond would
+       render a SECOND marker next to the theme's.
+     - Callouts are `<div class="callout">`, never `<blockquote>`. The
+       blockquote rule carries `:not(.callout)` anyway so callouts.css stays
+       in sole charge of thm/lem/cor/def/pf/case/imp/key.
+
+   TOGGLE POINTS — search for [OPT]:
+     [OPT-BG]   pane background recolor        — delete to keep AnuPpuccin's
+     [OPT-FONT] serif body font                — delete to keep the theme's
+     [OPT-NUM]  "01 / 02" numbered h2 headings — opt-in per note, see bottom
+   ========================================================================= */
+
+/* ---- palette (light) --------------------------------------------------- */
+
+.theme-light {
+  --lin-serif: "Iowan Old Style", "Charter", "Palatino Linotype", Palatino, Georgia, Cambria, serif;
+  --lin-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --lin-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  --lin-ground: #f6f8fb;
+  --lin-surface: #ffffff;
+  --lin-surface-2: #eef2f7;
+  --lin-ink: #16202e;
+  --lin-ink-soft: #3f4b5b;
+  --lin-muted: #6b7684;
+  --lin-line: #dbe2ea;
+  --lin-line-soft: #e8edf3;
+
+  --lin-core: #1a5fb4;
+  --lin-ops: #2e7d32;
+  --lin-decomp: #613583;
+  --lin-solve: #a51d2d;
+  --lin-iter: #6c5b00;
+  --lin-accent: var(--lin-core);
+
+  --lin-chip-bg: #f0f3f7;
+  --lin-code-bg: #f4f6f9;
+  --lin-code-ink: #24303f;
+}
+
+/* ---- palette (dark) ---------------------------------------------------- */
+
+.theme-dark {
+  --lin-serif: "Iowan Old Style", "Charter", "Palatino Linotype", Palatino, Georgia, Cambria, serif;
+  --lin-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --lin-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  --lin-ground: #0d131b;
+  --lin-surface: #141c26;
+  --lin-surface-2: #1a232f;
+  --lin-ink: #e7edf4;
+  --lin-ink-soft: #b3bec9;
+  --lin-muted: #7f8a98;
+  --lin-line: #253040;
+  --lin-line-soft: #1e2833;
+
+  --lin-core: #6ea8f0;
+  --lin-ops: #74c47a;
+  --lin-decomp: #b494dd;
+  --lin-solve: #e98a94;
+  --lin-iter: #c9b25a;
+  --lin-accent: var(--lin-core);
+
+  --lin-chip-bg: #1c2632;
+  --lin-code-bg: #10171f;
+  --lin-code-ink: #cdd8e4;
+}
+
+/* ---- fonts ------------------------------------------------------------- */
+/* [OPT-FONT] Both Obsidian core and AnuPpuccin build --font-text /
+   --font-monospace as `var(--*-override), var(--*-theme), …`, so filling in
+   the override slot cooperates with the theme instead of racing it.
+   Delete these two declarations to keep AnuPpuccin's fonts.               */
+
+body {
+  --font-text-override: var(--lin-serif);
+  --font-monospace-override: var(--lin-mono);
+}
+
+/* ---- map onto Obsidian's variables ------------------------------------- */
+/* Scoped to markdown panes so the sidebars, ribbon and modals stay theme.
+   `.markdown-preview-view` and `.print` are listed too because PDF export
+   renders outside any workspace leaf and would otherwise lose all of this. */
+
+.workspace-leaf-content[data-type="markdown"],
+.markdown-preview-view,
+.print {
+  /* [OPT-BG] the "ground" the note sits on */
+  --background-primary: var(--lin-ground);
+  --background-primary-alt: var(--lin-surface-2);
+  --background-secondary: var(--lin-surface);
+  --background-secondary-alt: var(--lin-surface-2);
+  --background-modifier-border: var(--lin-line);
+  --background-modifier-hover: var(--lin-surface-2);
+
+  --text-normal: var(--lin-ink);
+  --text-muted: var(--lin-ink-soft);
+  --text-faint: var(--lin-muted);
+  --text-accent: var(--lin-accent);
+  --text-accent-hover: var(--lin-accent);
+  --link-color: var(--lin-accent);
+  --link-color-hover: var(--lin-accent);
+
+  /* 780px measure — the supported hook, instead of max-width on a container */
+  --file-line-width: 780px;
+
+  --font-text-size: 18px;
+  --line-height-normal: 1.62;
+  --p-spacing: 1.05em;
+
+  /* heading scale — Obsidian applies these in BOTH views */
+  --h1-size: clamp(2.4rem, 6vw, 3.4rem);
+  --h1-weight: 600;
+  --h1-line-height: 1.04;
+  --h1-color: var(--lin-ink);
+
+  --h2-size: 1.7rem;
+  --h2-weight: 600;
+  --h2-color: var(--lin-ink);
+
+  --h3-size: 1.16rem;
+  --h3-weight: 600;
+  --h3-color: var(--lin-ink);
+
+  --h4-size: 0.8rem;
+  --h4-weight: 700;
+  --h4-color: var(--lin-muted);
+  --h5-size: 0.8rem;
+  --h5-weight: 700;
+  --h5-color: var(--lin-muted);
+  --h6-size: 0.8rem;
+  --h6-weight: 700;
+  --h6-color: var(--lin-muted);
+
+  /* AnuPpuccin sets --code-background / --code-normal on `body`; these sit
+     closer to the text and therefore win. */
+  --code-background: var(--lin-code-bg);
+  --code-normal: var(--lin-code-ink);
+  --code-size: 0.86em;
+  --code-comment: var(--lin-muted);
+  --code-keyword: var(--lin-decomp);
+  --code-string: var(--lin-ops);
+  --code-function: var(--lin-core);
+  --code-property: var(--lin-solve);
+
+  --hr-color: transparent; /* the real rule is the gradient below */
+  --hr-thickness: 2px;
+
+  /* rotated square bullets, via Obsidian's own bullet variables */
+  --list-marker-color: var(--lin-accent);
+  --list-bullet-size: 6px;
+  --list-bullet-radius: 2px;
+
+  --blockquote-border-color: var(--lin-accent);
+  --blockquote-color: var(--lin-ink-soft);
+
+  --table-header-size: 0.75rem;
+  --table-text-size: 0.95rem;
+  --table-border-color: var(--lin-line-soft);
+  --table-row-alt-background: transparent;
+  --table-row-background-hover: var(--lin-surface-2);
+}
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered,
+.print .markdown-rendered,
+.markdown-source-view.mod-cm6 .cm-content {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- headings ---------------------------------------------------------- */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered h1,
+.print .markdown-rendered h1,
+.markdown-source-view.mod-cm6 .HyperMD-header-1 {
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* h2 gets the hairline separator + breathing room above */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered h2,
+.print .markdown-rendered h2,
+.markdown-source-view.mod-cm6 .HyperMD-header-2 {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  margin-top: 3.6rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lin-line-soft);
+}
+/* …but not inside a callout. NOTE: no `h2:first-child` exception here — reading
+   view wraps every top-level block in its own `div.el-h2`, so `:first-child`
+   would match every h2 and silently cancel the rule above. */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .callout-content h2,
+.print .markdown-rendered .callout-content h2 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered h3,
+.print .markdown-rendered h3,
+.markdown-source-view.mod-cm6 .HyperMD-header-3 {
+  letter-spacing: -0.01em;
+  margin-top: 2.2rem;
+}
+
+/* h4-h6 become sans-serif uppercase eyebrows */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered h4,
+.print .markdown-rendered h4,
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered h5,
+.print .markdown-rendered h5,
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered h6,
+.print .markdown-rendered h6,
+.markdown-source-view.mod-cm6 .HyperMD-header-4,
+.markdown-source-view.mod-cm6 .HyperMD-header-5,
+.markdown-source-view.mod-cm6 .HyperMD-header-6 {
+  font-family: var(--lin-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1.8rem;
+}
+
+/* ---- the gradient rule (`---`) ----------------------------------------- */
+/* AnuPpuccin's own `hr { margin-block: 5px }` is (0,0,1) and loses to these. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered hr,
+.print .markdown-rendered hr,
+.markdown-source-view.mod-cm6 .cm-content hr,
+.markdown-source-view.mod-cm6 .cm-hr {
+  border: 0;
+  height: 2px;
+  border-radius: 2px;
+  margin-block-start: 2.6rem;
+  margin-block-end: 0;
+  background: linear-gradient(90deg,
+    var(--lin-core), var(--lin-ops), var(--lin-decomp), var(--lin-solve), var(--lin-iter));
+  opacity: 0.85;
+}
+
+/* ---- lists ------------------------------------------------------------- */
+/* Size/colour/radius come from the variables above; only the 45° turn that
+   makes the square a diamond has no variable. Obsidian draws checkboxes with
+   a different element, so task lists are untouched. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .list-bullet::after,
+.print .markdown-rendered .list-bullet::after,
+.markdown-source-view.mod-cm6 .list-bullet::after {
+  transform: rotate(45deg);
+}
+
+/* ---- code -------------------------------------------------------------- */
+/* Inline code uses the lighter "chip" ground; fenced blocks use --code-background. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered code:not(pre code),
+.print .markdown-rendered code:not(pre code),
+.markdown-source-view.mod-cm6 .cm-inline-code {
+  background: var(--lin-chip-bg);
+  padding: 0.1em 0.36em;
+  border-radius: 4px;
+  color: var(--lin-code-ink);
+}
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered pre,
+.print .markdown-rendered pre {
+  border: 1px solid var(--lin-line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered pre > code,
+.print .markdown-rendered pre > code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: var(--lin-code-ink);
+}
+
+.markdown-source-view.mod-cm6 .HyperMD-codeblock {
+  border-left: 1px solid var(--lin-line);
+  border-right: 1px solid var(--lin-line);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+.markdown-source-view.mod-cm6 .HyperMD-codeblock-begin {
+  border-top: 1px solid var(--lin-line);
+  border-radius: 8px 8px 0 0;
+}
+.markdown-source-view.mod-cm6 .HyperMD-codeblock-end {
+  border-bottom: 1px solid var(--lin-line);
+  border-radius: 0 0 8px 8px;
+}
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .cm-comment,
+.print .markdown-rendered .cm-comment,
+.markdown-source-view.mod-cm6 .cm-comment {
+  font-style: italic;
+}
+
+/* ---- tables ------------------------------------------------------------ */
+/* `.markdown-rendered` covers reading view AND the live-preview table widget,
+   so no separate CM6 selector is needed.
+
+   SIZING: the source design language set tables at 0.85rem because its cells
+   held short identifiers. Here they hold inline math. `rem` is root-relative
+   (16px), not relative to the 18px body, so 0.85rem was 13.6px against 18px
+   prose — and `td code` compounded a further 0.82em on top of that, landing
+   near 11px. Sizes below are raised to keep math cells legible. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered table,
+.print .markdown-rendered table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--lin-sans);
+  font-size: 0.95rem;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered thead th,
+.print .markdown-rendered thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lin-muted);
+  background: none;
+  padding: 0 14px 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--lin-line);
+  white-space: nowrap;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered tbody td,
+.print .markdown-rendered tbody td {
+  padding: 9px 14px 9px 0;
+  border: 0;
+  border-bottom: 1px solid var(--lin-line-soft);
+  vertical-align: top;
+  color: var(--lin-ink-soft);
+}
+/* NO `white-space: nowrap` on `td:first-child`.
+   The source design language used it to keep a leading identifier column on
+   one line. In this vault the first column is prose and inline math — e.g.
+   `$\|\lambda v\| = \|\lambda\|\,\|v\|$ (at $\lambda = -1$)` in
+   MATH-302/Notes/01-Notes.md — and nowrap forces that onto a single line,
+   pushing the whole table past the 780px measure with nothing to scroll it.
+   Letting the cell wrap is the fix. Headers keep nowrap below: they are short
+   labels, and a wrapped header row reads worse than a wide one. */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered tbody td code,
+.print .markdown-rendered tbody td code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.9em;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered tbody tr:hover td,
+.print .markdown-rendered tbody tr:hover td {
+  background: var(--lin-surface-2);
+}
+
+/* Live Preview wraps its editable table widget in `.table-wrapper`
+   (core: `.markdown-source-view.mod-cm6 .cm-table-widget .table-wrapper`,
+   which is `width: fit-content` — so a wide table there escapes the measure
+   rather than scrolling). Reading view emits no such wrapper, which is why
+   the wrapping fix above, not an overflow container, is what carries there. */
+.markdown-source-view.mod-cm6 .table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* ---- blockquote -------------------------------------------------------- */
+/* `:not(.callout)` keeps callouts.css in sole charge of callout styling.
+   Live Preview needs no rule: core already paints .HyperMD-quote with
+   --blockquote-color / --blockquote-border-color, set above.               */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered blockquote:not(.callout),
+.print .markdown-rendered blockquote:not(.callout) {
+  color: var(--lin-ink-soft);
+  font-style: italic;
+  padding: 0.2em 0 0.2em 1.1em;
+  border-left: 3px solid var(--lin-accent);
+}
+
+/* ---- links ------------------------------------------------------------- */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered a,
+.print .markdown-rendered a,
+.markdown-source-view.mod-cm6 .cm-link,
+.markdown-source-view.mod-cm6 .cm-hmd-internal-link {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered a:hover,
+.print .markdown-rendered a:hover {
+  text-decoration-thickness: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-leaf-content[data-type="markdown"] .markdown-rendered a,
+  .print .markdown-rendered a {
+    transition: text-decoration-thickness 0.12s ease;
+  }
+}
+
+/* ---- images ------------------------------------------------------------ */
+/* img.css owns alignment and border-radius via [alt] matching; this only adds
+   the containment rule and does not touch float/margin, so they compose.   */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered img,
+.print .markdown-rendered img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =========================================================================
+   [OPT-NUM] numbered section headings — the "01 / 02 …" eyebrows
+   Opt in per note with frontmatter:
+
+       ---
+       cssclasses: [numbered]
+       ---
+
+   To make it vault-wide instead, delete the `.numbered` qualifiers below.
+   Left opt-in because auto-numbering every `##` across a whole course vault
+   is rarely what you want.
+
+   CAVEAT: reliable in Reading view only. CodeMirror virtualizes long
+   documents, so headings scrolled out of the DOM stop incrementing and Live
+   Preview will renumber as you scroll.
+   ========================================================================= */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered.numbered,
+.print .markdown-rendered.numbered,
+.markdown-source-view.mod-cm6.numbered .cm-content {
+  counter-reset: sec;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered.numbered h2,
+.print .markdown-rendered.numbered h2,
+.markdown-source-view.mod-cm6.numbered .HyperMD-header-2 {
+  counter-increment: sec;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered.numbered h2::before,
+.print .markdown-rendered.numbered h2::before,
+.markdown-source-view.mod-cm6.numbered .HyperMD-header-2::before {
+  content: counter(sec, decimal-leading-zero);
+  font-family: var(--lin-mono);
+  font-size: 0.66em;
+  font-weight: 500;
+  color: var(--lin-accent);
+  margin-right: 0.7em;
+  letter-spacing: 0;
+}

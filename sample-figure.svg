@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 210" width="340" height="210" role="img" aria-label="Triangle inequality: the direct path from x to y is no longer than the detour through z">
+  <style>
+    .lbl  { font: italic 15px Georgia, "Iowan Old Style", serif; fill: #8b95a3; }
+    .pt   { font: italic 16px Georgia, "Iowan Old Style", serif; fill: #8b95a3; }
+    .edge { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  </style>
+
+  <!-- detour: x -> z -> y -->
+  <path class="edge" stroke="#4caf6a" d="M 45 165 L 172 45"/>
+  <path class="edge" stroke="#9575cd" d="M 172 45 L 295 165"/>
+  <!-- direct: x -> y -->
+  <path class="edge" stroke="#4a90d9" d="M 45 165 L 295 165"/>
+
+  <circle cx="45"  cy="165" r="4.5" fill="#4a90d9"/>
+  <circle cx="295" cy="165" r="4.5" fill="#4a90d9"/>
+  <circle cx="172" cy="45"  r="4.5" fill="#9575cd"/>
+
+  <text class="pt" x="28"  y="186">x</text>
+  <text class="pt" x="292" y="186">y</text>
+  <text class="pt" x="167" y="30">z</text>
+
+  <text class="lbl" x="72"  y="97"  transform="rotate(-43 72 97)">‖x−z‖</text>
+  <text class="lbl" x="224" y="75"  transform="rotate(44 224 75)">‖z−y‖</text>
+  <text class="lbl" x="137" y="158">‖x−y‖</text>
+</svg>

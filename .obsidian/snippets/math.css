@@ -1,0 +1,142 @@
+/* =========================================================================
+   math — display + inline LaTeX for a math-heavy vault
+   -------------------------------------------------------------------------
+   WHY THIS FILE EXISTS: Obsidian core ships exactly one CSS rule for math,
+
+       .markdown-source-view.mod-cm6 .math-block > mjx-container {
+         margin: 0; padding: 1em 0; overflow-x: auto;
+       }
+
+   (app CSS, verified against Obsidian 1.12.7) — Live Preview only. READING
+   VIEW and PDF export get nothing: a `$$…$$` wider than the 780px measure
+   there is laid out by MathJax's own injected sheet (display:block,
+   text-align:center, margin:1em 0) with no scroll container, so a long
+   `aligned` block or a wide matrix spills past the note edge instead of
+   scrolling. AnuPpuccin does not fill the gap either — its only live math
+   rule is `.math-block { font-size: var(--anp-latex-block-font-size,
+   var(--font-size-lg)) }` (theme.css:5773), and NEITHER of those variables
+   is defined anywhere in the theme or in core, so the declaration is invalid
+   at computed-value time and drops out. Everything else math-related in the
+   theme is `.anp-*`, which is inert without Style Settings.
+
+   Scoping mirrors linalg.css so the two agree; this file also stands alone —
+   every `--lin-*` reference carries a core-variable fallback, so it still
+   behaves if linalg.css is toggled off.
+   ========================================================================= */
+
+/* ---- display math: scroll instead of spill ----------------------------- */
+/* `justify-content: safe center` is the whole point of the flex container.
+   Centered content that overflows its scroll container puts half the overflow
+   past the inline-start edge, where it is UNREACHABLE — the scroll origin sits
+   at the content-box start edge, so there is nothing to scroll left to. `safe`
+   means "fall back to start alignment exactly when centering would cause
+   that", so wide equations stay fully scrollable and short ones stay centered.
+
+   Measured, not assumed. A 900px child in a 400px scroll container:
+
+       justify-content: center       child sits at -250px at scrollLeft 0;
+                                     maxScrollLeft 250; 650 of 900px ever
+                                     reachable — the first 250px are lost.
+       justify-content: safe center  child at 0px; maxScrollLeft 500;
+                                     900 of 900px reachable. A narrow child
+                                     is still centered in both.
+
+   (Gecko, since that was the engine available to test in. `safe` is Chromium
+   115+ and Obsidian 1.12.7 runs far past that, so it resolves the same way
+   here; the fallback is safe regardless — if the declaration is not
+   understood it drops, leaving `normal` alignment, which is flex-start, which
+   is reachable. There is no branch of this rule that can hide content.)
+
+   To go back to plain centered blocks, change `display` to `block` and delete
+   the `justify-content` line — but note that reintroduces exactly the
+   unreachable-left behaviour measured above for anything over the measure. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .math-block,
+.print .markdown-rendered .math-block {
+  display: flex;
+  justify-content: safe center;
+  overflow-x: auto;
+
+  /* Vertical breathing room. MathJax glyphs (bracket extenders, \sum limits,
+     \widetilde) routinely paint a hair outside their reported box, and the
+     scrollbar is laid over the bottom edge — both need clearance. Note that
+     `overflow-y` cannot be left visible here: CSS computes it to `auto`
+     whenever the other axis is `auto`, so the padding IS the fix, not a
+     second overflow value. */
+  padding-block: 0.2em;
+  margin-block: 1.5em;
+
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .math-block:hover,
+.print .markdown-rendered .math-block:hover {
+  scrollbar-color: var(--lin-line, var(--background-modifier-border)) transparent;
+}
+
+/* MathJax's injected sheet puts `margin: 1em 0` on display containers, which
+   would stack with the rhythm above. Specificity here is (0,4,1) against its
+   (0,2,1), so no !important is needed. */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .math-block > mjx-container,
+.print .markdown-rendered .math-block > mjx-container {
+  margin: 0;
+}
+
+/* Tagged equations — `\tag{1}`, or `\begin{align}` with numbering — render as
+   a full-width MathJax layout that pins the number to the right margin. As a
+   flex item that would shrink to its content and drag the tag inward. */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .math-block > mjx-container[width="full"],
+.print .markdown-rendered .math-block > mjx-container[width="full"] {
+  width: 100%;
+}
+
+/* ---- display math in a tighter context --------------------------------- */
+/* 1.5em is right between paragraphs of prose. Inside a callout or a list item
+   the block already has the container's padding around it, so the full
+   measure reads as a gap. `.callout-content` is itself `overflow-x: auto` in
+   core, so wide math in a proof callout was already scrollable — this is
+   only about rhythm. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .callout-content .math-block,
+.print .markdown-rendered .callout-content .math-block,
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered li .math-block,
+.print .markdown-rendered li .math-block {
+  margin-block: 0.85em;
+}
+
+/* A `$$` opening or closing a callout should not push against its padding. */
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .callout-content > .math-block:first-child,
+.print .markdown-rendered .callout-content > .math-block:first-child {
+  margin-block-start: 0.2em;
+}
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered .callout-content > .math-block:last-child,
+.print .markdown-rendered .callout-content > .math-block:last-child {
+  margin-block-end: 0.2em;
+}
+
+/* ---- inline math ------------------------------------------------------- */
+/* Inline math inside a table cell is the one place the default breaks down:
+   `white-space` on the row plus a \frac makes cells jump in height. Letting
+   the container size itself normally keeps rows even. */
+
+.workspace-leaf-content[data-type="markdown"] .markdown-rendered td .math:not(.math-block),
+.print .markdown-rendered td .math:not(.math-block) {
+  white-space: normal;
+}
+
+/* ---- print ------------------------------------------------------------- */
+/* `.print` really does contain `.markdown-rendered`: core's PDF export builds
+   `body > div.print > div.markdown-preview-view.markdown-rendered` and forces
+   `theme-light` on the body while it renders, so this rule fires and the
+   light half of every palette is what gets exported.
+
+   Paper has no scrollbar, so a scroll container just prints the clipped view.
+   Letting it overflow at least renders the equation up to the page edge, and
+   keeps the export identical to the on-screen left-aligned start. Anything
+   genuinely wider than the page still has to be broken by hand with `\\`
+   inside an `aligned` environment — CSS cannot reflow MathJax output. */
+
+.print .markdown-rendered .math-block {
+  display: block;
+  overflow-x: visible;
+}
