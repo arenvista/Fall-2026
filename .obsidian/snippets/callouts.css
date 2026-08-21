@@ -68,38 +68,51 @@
   --cal-yellow: 255, 214, 10;
   --cal-red:    255, 69, 58;
   --cal-pink:   255, 55, 95;
+--cal-white:    220, 224, 232;
 }
 
 /* ---- the statement environments ---------------------------------------- */
 
+/* FORMULA */
+.callout[data-callout="check"] {
+    --callout-color: var(--cal-white);
+    --callout-icon: "circle-check-big";
+}
+
+/* FORMULA */
+.callout[data-callout="form"] {
+    --callout-color: var(--cal-white);
+    --callout-icon: "lucide-milk";
+}
+
 /* THEOREM */
 .callout[data-callout="thm"] {
-    --callout-color: var(--cal-blue);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-scroll-text";
 }
 
 /* PROPOSITION — added for symmetry with thm/lem/cor; amsthm's fourth
    statement environment, and the one a math vault hits constantly. */
 .callout[data-callout="prop"] {
-    --callout-color: var(--cal-indigo);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-flag";
 }
 
 /* LEMMA */
 .callout[data-callout="lem"] {
-    --callout-color: var(--cal-cyan);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-puzzle";
 }
 
 /* COROLLARY */
 .callout[data-callout="cor"] {
-    --callout-color: var(--cal-purple);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-arrow-down-right";
 }
 
 /* DEFINITION */
 .callout[data-callout="def"] {
-    --callout-color: var(--cal-green);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-book-open";
 }
 
@@ -107,25 +120,25 @@
 
 /* INTUITION — the informal reading of a result */
 .callout[data-callout="hum"] {
-    --callout-color: var(--cal-cyan);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-brain";
 }
 
 /* CASE — "Case 1", scenario splits inside a proof */
 .callout[data-callout="case"] {
-    --callout-color: var(--cal-orange);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-briefcase";
 }
 
 /* QUESTION — open problems, things to ask about */
 .callout[data-callout="?"] {
-    --callout-color: var(--cal-yellow);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-help-circle";
 }
 
 /* IMPORTANT — risks, easy mistakes, "do not do this" */
 .callout[data-callout="imp"] {
-    --callout-color: var(--cal-red);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-alert-circle";
 }
 
@@ -136,7 +149,7 @@
    staying in the warm half of the palette. Revert by swapping in
    `var(--cal-red)`. */
 .callout[data-callout="key"] {
-    --callout-color: var(--cal-pink);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-key-round";
 }
 
@@ -145,7 +158,7 @@
    linearly, so it should not compete with the statement it follows. */
 
 .callout[data-callout="pf"] {
-    --callout-color: var(--cal-gray);
+        --callout-color: var(--cal-white);
     --callout-icon: "lucide-pen-tool";
     font-style: italic; /* amsthm's `proof` style sets the body in italic */
 }
@@ -186,4 +199,187 @@
     margin-top: 0.4em;
     color: rgb(var(--callout-color));
     font-style: normal;
+}
+
+/* ---- border modifier --------------------------------------------------- */
+/* Obsidian's callout syntax is `> [!type|metadata]` — anything after the pipe
+   is dropped into `data-callout-metadata` on the callout element and is
+   otherwise inert. That is the hook: append `|b` to any callout type to draw
+   a box around it, with nothing else about the type changing.
+   
+       > [!pf|b]        bordered proof
+       > [!pf|b]- Foo   bordered proof, collapsed, titled "Foo"
+   
+   The fold marker lives OUTSIDE the brackets, so `-` and `+` keep working
+   exactly as before — the metadata never collides with them.
+   
+   Core paints the callout box as
+   
+       border: var(--callout-border-width) solid
+               rgba(var(--callout-color), var(--callout-border-opacity));
+   
+   with the width defaulting to 0px, which is why callouts normally read as a
+   flat tint. Setting the two variables would be the tidy way to do this, but
+   a theme that hardcodes its own `border` on `.callout` would ignore them, so
+   the border is restated here explicitly and built from those same variables.
+   Anything downstream that reads them still sees consistent values.
+   
+   The color is the callout's own `--callout-color`, not a neutral gray, so a
+   bordered `[!thm]` outlines blue and a bordered `[!pf]` outlines gray — the
+   box reinforces the type instead of introducing a second visual language.
+   Opacity is 0.4 rather than core's 0.25: 0.25 is tuned for a border that is
+   always on and must stay out of the way, whereas this one is asked for
+   deliberately and should be visible.
+   
+   `~=` matches `b` as a whitespace-separated word, so metadata can carry more
+   than one flag later (`[!pf|b left]`) without this rule needing to change.
+   
+   To use a different character, change `b` in the selector — it is a plain
+   string match with no meaning to Obsidian. Avoid `|` itself (it separates
+   the metadata) and `]`. */
+
+.callout[data-callout-metadata~="b"] {
+    --callout-border-width: 1px;
+    --callout-border-opacity: 0.4;
+    border: var(--callout-border-width) solid
+            rgba(var(--callout-color), var(--callout-border-opacity));
+}
+
+/* A collapsed callout is title-row-only, and the title row carries its own
+   padding tuned for a borderless box; without this it sits flush against the
+   new outline. Reading view and Live Preview both expose the collapsed state
+   as `.is-collapsed`. */
+
+.callout[data-callout-metadata~="b"].is-collapsed > .callout-title {
+    margin-bottom: 0;
+}
+
+/* ---- no-box modifier --------------------------------------------------- */
+/* `nb` is the explicit opposite of `b`: draw no box, whatever anything else
+   says. Core's default is already borderless, so this is not for overriding
+   core — it is for overriding a THEME that draws its own callout border, and
+   for switching one callout back off when `b` is in play.
+   
+       > [!thm|nb]      no box, even under a theme that boxes everything
+       > [!thm|b nb]    no box — see below
+   
+   `~=` matches whole words, so `nb` is not a match for `~="b"`; the two flags
+   are independent and a callout carrying both matches both rules. They have
+   equal specificity, so the cascade settles it by document order and this
+   block sits after `b` deliberately: nb wins, in either written order.
+   That is the useful way round — `b` is the decoration and `nb` is the
+   override — and it means a vault-wide find-and-replace adding `b` can be
+   damped case by case without unpicking it.
+   
+   `border-style: none` rather than a zero width, because a theme may set
+   width and style in separate rules; killing the style kills the box no
+   matter which half it set. The width variable is zeroed too so anything
+   downstream reading it agrees with what is painted. */
+
+.callout[data-callout-metadata~="nb"] {
+    --callout-border-width: 0px;
+    border-style: none;
+}
+
+/* ---- untitled callouts: icon only, body pulled up ---------------------- */
+/* `> [!pf]` with nothing after it renders a title row reading "Pf". That row
+   is pure noise — the icon already says what the block is — and it costs a
+   full line before the content starts.
+   
+   IMPORTANT, because it constrains everything below: the DOM cannot tell you
+   whether a title was written. When the callout line carries no text,
+   Obsidian's blockquote transformer SYNTHESIZES one from the type:
+   
+       d = t.type.trim().replace(/\-/g," ").toLowerCase();
+       d = d.charAt(0).toUpperCase() + d.substr(1);
+       n.push({type:"callout-title", children:[{type:"text", value:d}]})
+   
+   so `> [!pf]` and `> [!pf] Pf` emit byte-identical HTML, and CSS cannot match
+   text content anyway. There is no selector for "untitled".
+   
+   The resolution is to invert the default: a callout is icon-only unless it
+   asks for a title with `t`, on the same metadata channel `b` and `nb` use.
+   All three compose, in any order.
+   
+       > [!pf]                icon, then the argument on the same line
+       > [!pf]-               icon + fold chevron, no "Pf"
+       > [!thm|t] Theorem 3.1 titled
+       > [!thm|b t] Case 2    bordered and titled
+   
+   THIS IS A BREAKING DEFAULT. Every callout in the vault that carries a title
+   needs `t` or its title disappears — there were 28 at the time this was
+   written, and they were migrated in the same change that added this block.
+   Anything written afterwards has to opt in the same way.
+   
+   SCOPE. The rules are confined to markdown views because Obsidian builds its
+   own UI out of callouts too — the release-notes panel constructs
+   `createDiv("callout is-collapsed is-collapsible")` and sets a real title on
+   it. Unscoped, this block would blank those. Nothing outside a note is
+   touched. (`b` and `nb` need no such guard: they only fire on metadata,
+   which app-built callouts never carry.)
+   
+   LAYOUT. The body is pulled up by giving the title row `height: 0` and
+   letting the icon overflow it, rather than floating the title or dragging
+   the content up with a negative margin. Both alternatives fail here:
+   
+     - `.callout-content` is `overflow-x: auto` in core, which makes it a new
+       block formatting context, and a BFC box may not overlap a float. The
+       body would be pushed right along its WHOLE height instead of wrapping
+       its first line beside the icon. Removing `overflow-x` to fix that would
+       cost horizontal scrolling on wide `$$` blocks and tables — a bad trade
+       in this vault.
+     - A negative margin is the guesswork the QED note above already rejects:
+       it has to match a title-row height built from `--callout-title-padding`
+       and `--line-height-tight`, and it lands wrong the moment a theme
+       retunes either.
+   
+   Zero height needs no measurement. The title stops occupying vertical space,
+   the content begins at the top of the callout, and `text-indent` on the
+   first paragraph opens exactly enough room on line one for the icon that is
+   now overflowing into it. Core sets both `--callout-title-padding` and
+   `--callout-content-padding` to 0, so the two share a left edge and the
+   indent is simply the icon's own width plus the title row's flex `gap`.
+   
+   The `:has(> .callout-content > p:first-child)` guard restricts the pull-up
+   to callouts that OPEN with a paragraph. One starting with a display
+   equation or a list has no first line to hang the icon on, and `text-indent`
+   does not meaningfully apply to either — those keep an ordinary title row,
+   with the icon on top and the text hidden.
+   
+   Collapsible callouts (`-` / `+`) are excluded from the pull-up as well: a
+   fold needs a header row to click, so they keep one, carrying just the icon
+   and the chevron. */
+
+:is(.markdown-rendered, .markdown-source-view) .callout:not([data-callout-metadata~="t"])
+        > .callout-title > .callout-title-inner {
+    display: none;
+}
+
+:is(.markdown-rendered, .markdown-source-view) .callout:not([data-callout-metadata~="t"]):not(.is-collapsible):has(> .callout-content > p:first-child) {
+    /* Icon width plus the flex gap core puts between icon and title. Both are
+       read from core's own variables so a theme that resizes icons keeps the
+       indent in step; the fallbacks are core's defaults. */
+    --cal-icon-indent: calc(var(--icon-size, 18px) + var(--size-4-1, 4px));
+}
+
+:is(.markdown-rendered, .markdown-source-view) .callout:not([data-callout-metadata~="t"]):not(.is-collapsible):has(> .callout-content > p:first-child)
+        > .callout-title {
+    height: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+:is(.markdown-rendered, .markdown-source-view) .callout:not([data-callout-metadata~="t"]):not(.is-collapsible):has(> .callout-content > p:first-child)
+        > .callout-content > p:first-child {
+    text-indent: var(--cal-icon-indent);
+}
+
+/* The one hand-tuned number here. The icon is 18px and the first line box is
+   roughly 1.5em, so the icon sits a little high against the text it now
+   shares a line with; this drops it onto the baseline's optical center. Set
+   it to 0 to see the untuned position. */
+
+:is(.markdown-rendered, .markdown-source-view) .callout:not([data-callout-metadata~="t"]):not(.is-collapsible):has(> .callout-content > p:first-child)
+        > .callout-title > .callout-icon {
+    transform: translateY(0.15em);
 }

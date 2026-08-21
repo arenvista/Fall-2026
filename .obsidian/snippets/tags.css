@@ -1,0 +1,85 @@
+/* =========================================================================
+   tags — inline #hashtags as quiet blue italic annotations
+   -------------------------------------------------------------------------
+   WHAT THIS CHANGES: an inline tag ships as a PILL. Core paints it from a
+   set of --tag-* variables (verified against the installed Obsidian, app CSS
+   `:root`):
+
+       --tag-size: var(--font-smaller);   --tag-padding-x: 0.65em;
+       --tag-color: var(--text-accent);   --tag-padding-y: 0.25em;
+       --tag-weight: inherit;             --tag-radius: 2em;
+       --tag-border-width: 0px;           --tag-decoration: none;
+       --tag-background: color-mix(in oklch, var(--interactive-accent) 10%, transparent);
+
+   and AnuPpuccin re-tints the background/border pair off its accent
+   (theme.css:3236-3239) while leaving --tag-color to core. The result is an
+   accent-coloured lozenge sitting in the prose. This file turns that into
+   plain running text: semi-transparent blue, italic, one step smaller, no
+   capsule around it.
+
+   TWO SURFACES, ONE SET OF VARIABLES. Core drives both renderers off the
+   same --tag-* names —
+
+       a.tag        { color/font-size/font-weight/padding/border/radius }
+       .cm-hashtag  { same, split across .cm-hashtag-begin (the `#`) and
+                      .cm-hashtag-end (the name), which carry the inline
+                      padding and border halves }
+
+   — so overriding the VARIABLES rather than the properties is what makes the
+   begin/end split fall into line for free. Only `font-style` has no variable
+   behind it (core exposes no --tag-style), so it is set directly.
+
+   SCOPING NOTES (audited against Obsidian core CSS and AnuPpuccin theme.css):
+     - The overrides sit on the tag ELEMENTS, not on `body`, and that is
+       deliberate. Core maps the property-panel pills onto these same names:
+       `.metadata-property-value[data-property-type="tags"] .multi-select-pill`
+       sets --pill-color/-background/-padding/-radius from the --tag-*
+       values. Declaring them globally would strip the pills off the
+       frontmatter `tags:` field and the tag pane too. Scoped here, the
+       properties panel, tag pane, and search results keep the theme's look.
+     - Blue comes from --color-blue-rgb, a CORE variable that AnuPpuccin
+       remaps to its own --ctp-blue in both the plain `.theme-dark` (2891)
+       and `.theme-light` (2920) blocks — no Style Settings needed. So this
+       tracks Catppuccin's blue under the theme and core's own blue without
+       it; the literal in the var() fallback is core's light-mode value and
+       only ever applies if BOTH are somehow missing.
+     - AnuPpuccin's `body.rainbow-tags` block (theme.css:5962) would colour
+       tags per-hash, but that class comes from Style Settings, which is not
+       installed — inert, nothing to fight.
+     - `line-height` is reset to inherit. Core hard-codes `line-height: 1` on
+       a.tag to keep the capsule tight; with the padding gone that pulls the
+       tag off the prose baseline, so it goes back to the paragraph's.
+
+   TO TUNE: the three knobs are --tags-color-rgb, --tags-opacity and
+   --tags-size, below. TO GET THE PILL BACK: delete this file (or untick it
+   in Settings > Appearance > CSS snippets) — nothing here is !important, so
+   it all falls back to core + theme cleanly.
+   ========================================================================= */
+
+.markdown-rendered a.tag,
+.markdown-source-view.mod-cm6 .cm-hashtag {
+    /* ---- knobs ---------------------------------------------------------- */
+    /* Comma-separated RGB triplet. The commas inside var()'s fallback are
+     intentional and legal: everything after the first comma is the fallback,
+     so this reads as `8, 109, 221` when --color-blue-rgb is undefined. */
+    --tags-color-rgb: var(--color-blue-rgb, 8, 109, 221);
+    --tags-opacity: 0.5;
+    --tags-size: var(--font-smallest); /* 0.8em, vs core's 0.875em for tags */
+
+    /* ---- the pill, dismantled ------------------------------------------- */
+    --tag-background: transparent;
+    --tag-background-hover: transparent;
+    --tag-border-width: 0px;
+    --tag-padding-x: 0em;
+    --tag-padding-y: 0em;
+    --tag-radius: 0em;
+
+    /* ---- what is left: small, italic, semi-transparent blue -------------- */
+    --tag-size: var(--tags-size);
+    --tag-color: rgba(var(--tags-color-rgb), var(--tags-opacity));
+    --tag-color-hover: rgb(var(--tags-color-rgb)); /* hover = full opacity */
+
+    font-size: 0px;
+    font-style: italic;
+    line-height: inherit;
+}

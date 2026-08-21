@@ -7,7 +7,7 @@ cssclasses: [numbered]
 
 # Every styled element, on one page
 
-A reference note that exercises each rule in the four content snippets, so you
+A reference note that exercises each rule in the five content snippets, so you
 can see what a change does without hunting for a real note that happens to use
 the feature. `cssclasses: [numbered]` is set in the frontmatter above, which is
 why every `##` below carries an `01` / `02` eyebrow — delete that line to see
@@ -17,7 +17,7 @@ Inline styling: **bold**, _italic_, `inline code`, ~~strikethrough~~, a
 [external link](https://obsidian.md), an internal link to [[01-Notes]], and
 inline math $\|x - y\| \le \|x - z\| + \|z - y\|$ sitting in a line of prose.
 
-> [!imp] Two things this page cannot show you
+> [!imp|t] Two things this page cannot show you
 > `transparent-ui.css` styles the window chrome — titlebar, ribbon, sidebars,
 > status bar — so it is visible *around* this note, never inside it.
 >
@@ -78,43 +78,43 @@ Display math nested in a list item takes tighter margins:
 
 ## Callout environments
 
-> [!thm] Theorem (norm induces a metric)
+> [!thm|t] Theorem (norm induces a metric)
 > Let $(V, \|\cdot\|)$ be a normed vector space. Then $d(x,y) = \|x - y\|$
 > defines a metric on $V$.
 
-> [!prop] Proposition
+> [!prop|t] Proposition
 > Non-negativity is redundant: it follows from the remaining three axioms.
 
-> [!lem] Lemma
+> [!lem|t] Lemma
 > For any $v \in V$, $\|-v\| = \|v\|$.
 
-> [!cor] Corollary
+> [!cor|t] Corollary
 > Every normed space is a topological space under the metric topology.
 
-> [!def] Definition (metric space)
+> [!def|t] Definition (metric space)
 > A set $V$ with a function $d : V \times V \to \mathbb{R}$ satisfying
 > non-negativity, identity of indiscernibles, symmetry, and the triangle
 > inequality.
 
-> [!hum] Intuition
+> [!hum|t] Intuition
 > A norm measures the size of one vector; a metric measures the distance
 > between two points. In a vector space you can convert one into the other,
 > because the displacement from $y$ to $x$ is just the vector $x - y$.
 
-> [!case] Case 1
+> [!case|t] Case 1
 > Suppose $\lambda = -1$. Then homogeneity gives symmetry directly.
 
-> [!?] Open question
+> [!?|t] Open question
 > Which metrics on a vector space arise from a norm?
 
-> [!key] Key takeaway
+> [!key|t] Key takeaway
 > Translation invariance plus absolute homogeneity is exactly the condition
 > for a metric to come from a norm.
 
-> [!imp] Careful
+> [!imp|t] Careful
 > The converse fails. The discrete metric is a metric that no norm induces.
 
-> [!def]- A collapsed callout
+> [!def|t]- A collapsed callout
 > Callouts ending in `-` start folded; `+` starts them open but foldable.
 > Both keep their type color.
 
@@ -124,7 +124,7 @@ drops the hairline rule, the 3.6rem lead **and** the section number that a
 top-level `##` gets — an `##` used as structure inside a callout is not a
 section of the document:
 
-> [!def] Definition ($p$-norm)
+> [!def|t] Definition ($p$-norm)
 > $$\|v\|_{p} = \left( \sum_{i=1}^{n} |v_i|^{p} \right)^{1/p}$$
 >
 > ## Special cases
@@ -136,7 +136,7 @@ section of the document:
 A proof ending in a paragraph gets the marker appended to the final line, the
 way `amsthm` places it:
 
-> [!pf] Proof
+> [!pf|t] Proof
 > Substituting $v = x - y$ into $\|v\| \ge 0$ gives non-negativity, and
 > $\|v\| = 0 \iff v = \vec{0}$ gives identity of indiscernibles. Symmetry
 > follows from homogeneity at $\lambda = -1$.
@@ -147,17 +147,17 @@ provided Obsidian does not wrap the lone equation in a paragraph, in which
 case the inline rule applies instead and it lands after the equation. Either
 way it renders; this is the one case worth glancing at to see which:
 
-> [!pf] Proof (triangle inequality)
+> [!pf|t] Proof (triangle inequality)
 > Write $x - y = (x - z) + (z - y)$ and set $a = x - z$, $b = z - y$:
 > $$\|x - y\| = \|a + b\| \le \|a\| + \|b\| = \|x - z\| + \|z - y\|.$$
 
 A nested callout inside a proof must **not** pick up a stray marker of its own
 — only the outer proof gets one:
 
-> [!pf] Proof by cases
+> [!pf|t] Proof by cases
 > Split on whether $x = y$.
 >
-> > [!case] Case 1: $x = y$
+> > [!case|t] Case 1: $x = y$
 > > Then $\|x - y\| = \|\vec{0}\| = 0$, and there is nothing to check.
 >
 > Case 2 is the generic one, and closes the argument.
@@ -245,6 +245,22 @@ sets `clear`, so on a wide pane a short paragraph will simply end alongside
 the figure and the next block will continue to flow beside it — which is the
 intended behaviour for a margin figure, but worth knowing if you ever put a
 heading or a rule directly after one.
+
+## Tags
+
+`tags.css` strips the pill off inline tags and leaves running text: semi-transparent
+blue, italic, one step smaller than the surrounding prose. A tag in a sentence —
+#combinatorics — sits in the line rather than interrupting it, and nested tags like
+#math/graph-theory read the same way.
+
+Hover one to see it go to full opacity; that is the only hover feedback left once
+the background is gone. Purely numeric hashes are never tags, which is why "Midterm
+Exam #1" stays plain text.
+
+The snippet is deliberately scoped to rendered notes and the editor, so the
+`tags: [meta]` pill in this note's frontmatter is left alone — core drives those
+pills off the same `--tag-*` variables, and overriding them globally would flatten
+the properties panel and tag pane too.
 
 ---
 

@@ -33,7 +33,7 @@ Geometrically this is the familiar statement that detouring through $z$ never sh
 
 **Definition 1.1 isn't a definition.** As stated, it defines a metric space using $\|x-y\|$ — but a metric space is a set with _any_ function $d$ satisfying those four properties, with no norm in sight. Right now the definition and the proof are the same object stated twice, and the definition is circular for the purposes of this problem. It should read:
 
-> [!pf]  A set $V$ is a metric space if equipped with $d: V \times V \to \mathbb{R}$ such that for all $x,y,z \in V$: (1) $d(x,y) \ge 0$; (2) $d(x,y) = 0 \iff x = y$; (3) $d(x,y) = d(y,x)$; (4) $d(x,y) \le d(x,z) + d(z,y)$.
+> [!pf|t]  A set $V$ is a metric space if equipped with $d: V \times V \to \mathbb{R}$ such that for all $x,y,z \in V$: (1) $d(x,y) \ge 0$; (2) $d(x,y) = 0 \iff x = y$; (3) $d(x,y) = d(y,x)$; (4) $d(x,y) \le d(x,z) + d(z,y)$.
 
 Then the proof does the work of checking $d(x,y) = \|x-y\|$ satisfies them. As a bonus, the definition block is currently inconsistent with itself — items 1–3 carry justifications while item 4 is bare.
 

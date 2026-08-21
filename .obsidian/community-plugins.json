@@ -1,4 +1,6 @@
 [
-  "obsidian-tikzjax",
-  "better-export-pdf"
+  "better-export-pdf",
+  "luatikz",
+  "obsidian-pandoc",
+  "floating-headings"
 ]
