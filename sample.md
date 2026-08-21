@@ -118,6 +118,19 @@ Display math nested in a list item takes tighter margins:
 > Callouts ending in `-` start folded; `+` starts them open but foldable.
 > Both keep their type color.
 
+A callout may open with a display equation and carry headings of its own. The
+equation loses the margin it would take between paragraphs, and the heading
+drops the hairline rule, the 3.6rem lead **and** the section number that a
+top-level `##` gets — an `##` used as structure inside a callout is not a
+section of the document:
+
+> [!def] Definition ($p$-norm)
+> $$\|v\|_{p} = \left( \sum_{i=1}^{n} |v_i|^{p} \right)^{1/p}$$
+>
+> ## Special cases
+> At $p = 1$ this is the taxicab norm, at $p = 2$ the Euclidean norm, and the
+> limit $p \to \infty$ gives $\max_i |v_i|$.
+
 ### Proofs and the QED marker
 
 A proof ending in a paragraph gets the marker appended to the final line, the
@@ -128,8 +141,11 @@ way `amsthm` places it:
 > $\|v\| = 0 \iff v = \vec{0}$ gives identity of indiscernibles. Symmetry
 > follows from homogeneity at $\lambda = -1$.
 
-A proof ending in a display equation gets it on its own line, flush right,
-because there is no line of text for it to sit on:
+A proof ending in a display equation has no line of text for the marker to
+sit on, so the `:has()` fallback puts it on a line of its own, flush right —
+provided Obsidian does not wrap the lone equation in a paragraph, in which
+case the inline rule applies instead and it lands after the equation. Either
+way it renders; this is the one case worth glancing at to see which:
 
 > [!pf] Proof (triangle inequality)
 > Write $x - y = (x - z) + (z - y)$ and set $a = x - z$, $b = z - y$:
@@ -224,7 +240,11 @@ The detour through $z$ never shortens the trip, which is the geometric reading
 of the triangle inequality. This paragraph exists mainly to give the floated
 figure something to sit beside, so keep it long enough to actually wrap past
 the bottom edge of the image and demonstrate that the float clears correctly
-rather than colliding with whatever follows it.
+rather than colliding with whatever follows it. Note that nothing in `img.css`
+sets `clear`, so on a wide pane a short paragraph will simply end alongside
+the figure and the next block will continue to flow beside it — which is the
+intended behaviour for a margin figure, but worth knowing if you ever put a
+heading or a rule directly after one.
 
 ---
 
